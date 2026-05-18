@@ -1,0 +1,6 @@
+{
+  "name": "cot-dashboard",
+  "version": "1.0.0",
+  "description": "COT Dashboard by sheewchukk",
+  "engines": { "node": ">=18" }
+}

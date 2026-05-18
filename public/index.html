@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>COT Dashboard · by sheewchukk</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg:       #0d0f14;
+      --surface:  #13161e;
+      --surface2: #1a1e28;
+      --border:   rgba(255,255,255,0.06);
+      --border2:  rgba(255,255,255,0.12);
+      --text:     #f0f2f8;
+      --muted:    #5a6280;
+      --muted2:   #8490b0;
+
+      --blue:     #4f8ef7;
+      --blue-dim: rgba(79,142,247,0.15);
+      --red:      #f75f5f;
+      --red-dim:  rgba(247,95,95,0.15);
+      --green:    #3dd68c;
+      --green-dim:rgba(61,214,140,0.15);
+      --yellow:   #f7c04f;
+      --purple:   #9f7afa;
+      --cyan:     #4fc8f7;
+
+      --radius:   10px;
+      --radius-lg:14px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Geist', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── TOP NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(13,15,20,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-logo {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
+
+    .nav-badge {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: var(--blue-dim);
+      color: var(--blue);
+      border: 1px solid rgba(79,142,247,0.25);
+      letter-spacing: 0.2px;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .live-dot {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .live-dot::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 0 rgba(61,214,140,0.4);
+      animation: ping 2s ease-in-out infinite;
+    }
+    @keyframes ping {
+      0%,100% { box-shadow: 0 0 0 0 rgba(61,214,140,0.4); }
+      50%      { box-shadow: 0 0 0 5px rgba(61,214,140,0); }
+    }
+
+    /* ── PAGE ── */
+    .page { max-width: 1140px; margin: 0 auto; padding: 28px 24px 60px; }
+
+    /* ── CONTROLS BAR ── */
+    .controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .select-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 260px;
+      max-width: 400px;
+    }
+    .select-wrap::after {
+      content: '';
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0; height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-top: 5px solid var(--muted);
+      pointer-events: none;
+    }
+
+    select {
+      width: 100%;
+      appearance: none;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: 'Geist', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 10px 36px 10px 14px;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    select:focus { border-color: var(--blue); }
+
+    .tabs {
+      display: flex;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      padding: 3px;
+      gap: 2px;
+    }
+    .tab {
+      font-family: 'Geist', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 7px;
+      border: none;
+      background: transparent;
+      color: var(--muted2);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active {
+      background: var(--blue);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(79,142,247,0.35);
+    }
+
+    /* ── STATUS CHIP ── */
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      font-size: 12px;
+      color: var(--muted2);
+      flex-wrap: wrap;
+    }
+    .status-chip {
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      font-size: 11px;
+    }
+    #status-date { color: var(--cyan); }
+
+    /* ── METRICS ── */
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .metric {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px 18px;
+      transition: border-color 0.2s, transform 0.2s;
+      cursor: default;
+    }
+    .metric:hover { border-color: var(--border2); transform: translateY(-1px); }
+
+    .metric-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 8px;
+    }
+    .metric-value {
+      font-family: 'Geist Mono', monospace;
+      font-size: 22px;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .metric-delta {
+      font-size: 11px;
+      font-family: 'Geist Mono', monospace;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .metric-delta.up   { color: var(--green); }
+    .metric-delta.down { color: var(--red); }
+    .metric-delta.flat { color: var(--muted); }
+
+    /* color accents on metric top border */
+    .metric[data-color="blue"]   { border-top: 2px solid var(--blue);   }
+    .metric[data-color="red"]    { border-top: 2px solid var(--red);    }
+    .metric[data-color="yellow"] { border-top: 2px solid var(--yellow); }
+    .metric[data-color="purple"] { border-top: 2px solid var(--purple); }
+    .metric[data-color="cyan"]   { border-top: 2px solid var(--cyan);   }
+    .metric[data-color="green"]  { border-top: 2px solid var(--green);  }
+
+    /* ── CHARTS GRID ── */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    @media (max-width: 700px) { .charts-grid { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+    }
+    .card.wide { grid-column: 1 / -1; }
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .card-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted2);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .legend {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .leg {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--muted2);
+    }
+    .leg-sq {
+      width: 8px; height: 8px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .chart-wrap { position: relative; width: 100%; }
+
+    /* ── BREAKDOWN BARS ── */
+    .breakdown { display: flex; flex-direction: column; gap: 10px; }
+    .br-row {
+      display: grid;
+      grid-template-columns: 110px 1fr 100px;
+      align-items: center;
+      gap: 12px;
+    }
+    .br-label {
+      font-size: 11px;
+      color: var(--muted2);
+      text-align: right;
+      font-weight: 500;
+    }
+    .br-track {
+      height: 8px;
+      background: var(--surface2);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .br-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.7s cubic-bezier(.4,0,.2,1);
+    }
+    .br-val {
+      font-family: 'Geist Mono', monospace;
+      font-size: 11px;
+      color: var(--muted2);
+    }
+
+    /* ── LOADING / ERROR ── */
+    .state {
+      text-align: center;
+      padding: 48px 20px;
+      font-size: 13px;
+    }
+    .state.loading { color: var(--cyan); }
+    .state.error   { color: var(--red); }
+    .state .icon { font-size: 28px; margin-bottom: 12px; }
+
+    /* ── SPINNER ── */
+    .spinner {
+      width: 20px; height: 20px;
+      border: 2px solid var(--border2);
+      border-top-color: var(--cyan);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── FOOTER ── */
+    footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    footer a { color: var(--blue); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">
+    <span class="nav-logo">COT Dashboard</span>
+    <span class="nav-badge">CFTC</span>
+  </div>
+  <div class="nav-right">
+    <span id="nav-date" style="font-family:'Geist Mono',monospace">—</span>
+    <span class="live-dot">Live</span>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <div class="select-wrap">
+      <select id="contractSel"></select>
+    </div>
+    <div class="tabs" id="periodTabs">
+      <button class="tab active" data-w="13">13W</button>
+      <button class="tab" data-w="26">26W</button>
+      <button class="tab" data-w="52">52W</button>
+      <button class="tab" data-w="0">ALL</button>
+    </div>
+  </div>
+
+  <!-- STATUS -->
+  <div class="status-row">
+    <span class="status-chip live-dot">CFTC · Commitments of Traders</span>
+    <span class="status-chip" id="status-date">—</span>
+    <span class="status-chip" id="status-rows">—</span>
+    <span id="status-msg" style="margin-left:4px; color:var(--muted)">Оберіть контракт</span>
+  </div>
+
+  <!-- METRICS -->
+  <div class="metrics">
+    <div class="metric" data-color="blue">
+      <div class="metric-label">Нек. Long</div>
+      <div class="metric-value" id="mv-nl">—</div>
+      <div class="metric-delta flat" id="md-nl">—</div>
+    </div>
+    <div class="metric" data-color="red">
+      <div class="metric-label">Нек. Short</div>
+      <div class="metric-value" id="mv-ns">—</div>
+      <div class="metric-delta flat" id="md-ns">—</div>
+    </div>
+    <div class="metric" data-color="yellow">
+      <div class="metric-label">Ком. Long</div>
+      <div class="metric-value" id="mv-cl">—</div>
+      <div class="metric-delta flat" id="md-cl">—</div>
+    </div>
+    <div class="metric" data-color="purple">
+      <div class="metric-label">Ком. Short</div>
+      <div class="metric-value" id="mv-cs">—</div>
+      <div class="metric-delta flat" id="md-cs">—</div>
+    </div>
+    <div class="metric" data-color="cyan">
+      <div class="metric-label">Net Speculative</div>
+      <div class="metric-value" id="mv-net">—</div>
+      <div class="metric-delta flat" id="md-net">—</div>
+    </div>
+    <div class="metric" data-color="green">
+      <div class="metric-label">Open Interest</div>
+      <div class="metric-value" id="mv-oi">—</div>
+      <div class="metric-delta flat" id="md-oi">—</div>
+    </div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="charts-grid">
+
+    <div class="card wide">
+      <div class="card-head">
+        <span class="card-title">Позиції по тижнях</span>
+        <div class="legend">
+          <div class="leg"><span class="leg-sq" style="background:#4f8ef7"></span>Нек. Long</div>
+          <div class="leg"><span class="leg-sq" style="background:#f75f5f"></span>Нек. Short</div>
+          <div class="leg"><span class="leg-sq" style="background:#f7c04f; opacity:.8"></span>Ком. Long</div>
+          <div class="leg"><span class="leg-sq" style="background:#9f7afa; opacity:.8"></span>Ком. Short</div>
+        </div>
+      </div>
+      <div class="chart-wrap" style="height:240px">
+        <canvas id="posChart" role="img" aria-label="Позиції COT по тижнях">Дані позицій</canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Net Speculative</span>
+        <div class="legend">
+          <div class="leg"><span class="leg-sq" style="background:#3dd68c"></span>Bullish</div>
+          <div class="leg"><span class="leg-sq" style="background:#f75f5f"></span>Bearish</div>
+        </div>
+      </div>
+      <div class="chart-wrap" style="height:200px">
+        <canvas id="netChart" role="img" aria-label="Net Speculative позиція">Net позиція</canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Open Interest</span>
+      </div>
+      <div class="chart-wrap" style="height:200px">
+        <canvas id="oiChart" role="img" aria-label="Open Interest">Open Interest</canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BREAKDOWN -->
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-head"><span class="card-title">Розподіл — останній звіт</span></div>
+    <div id="breakdown"><div class="state loading"><span class="spinner"></span>Оберіть контракт для завантаження даних</div></div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <span>COT Dashboard · by <strong>sheewchukk</strong></span>
+    <span>Дані: <a href="https://publicreporting.cftc.gov" target="_blank">publicreporting.cftc.gov</a> · щоп'ятниці ~15:30 ET · позиції вівторка</span>
+  </footer>
+
+</div>
+
+<script>
+// ── CONTRACTS ──────────────────────────────────────────────────────────────
+const CONTRACTS = [
+  { label:'── Валюти ──',             code:'', disabled:true },
+  { label:'EUR/USD — Euro FX',        code:'099741' },
+  { label:'GBP/USD — British Pound',  code:'096742' },
+  { label:'JPY/USD — Japanese Yen',   code:'097741' },
+  { label:'CHF/USD — Swiss Franc',    code:'092741' },
+  { label:'CAD/USD — Canadian Dollar',code:'090741' },
+  { label:'AUD/USD — Australian Dollar',code:'232741'},
+  { label:'NZD/USD — New Zealand Dollar',code:'112741'},
+  { label:'US Dollar Index (ICE)',    code:'098662' },
+  { label:'── Метали ──',             code:'', disabled:true },
+  { label:'Gold (COMEX)',             code:'088691' },
+  { label:'Silver (COMEX)',           code:'084691' },
+  { label:'Copper (COMEX)',           code:'085692' },
+  { label:'── Енергоносії ──',        code:'', disabled:true },
+  { label:'WTI Crude Oil (NYMEX)',    code:'067651' },
+  { label:'Natural Gas (NYMEX)',      code:'023651' },
+  { label:'── Індекси ──',            code:'', disabled:true },
+  { label:'S&P 500 E-mini (CME)',     code:'13874A' },
+  { label:'Nasdaq 100 E-mini (CME)',  code:'20974P' },
+  { label:'Dow Jones E-mini (CBOT)',  code:'12460P' },
+  { label:'── Облігації ──',          code:'', disabled:true },
+  { label:'10-Year T-Note (CBOT)',    code:'043602' },
+  { label:'2-Year T-Note (CBOT)',     code:'042601' },
+  { label:'── Крипто ──',             code:'', disabled:true },
+  { label:'Bitcoin (CME)',            code:'133741' },
+  { label:'Ether (CME)',              code:'23066A' },
+  { label:'── Агро ──',               code:'', disabled:true },
+  { label:'Corn (CBOT)',              code:'002602' },
+  { label:'Wheat (CBOT)',             code:'001602' },
+  { label:'Soybeans (CBOT)',          code:'005602' },
+  { label:'Sugar #11 (ICE)',          code:'080732' },
+  { label:'Coffee (ICE)',             code:'083731' },
+];
+
+// populate select
+const sel = document.getElementById('contractSel');
+const ph = document.createElement('option');
+ph.value = ''; ph.textContent = '— Оберіть контракт —';
+sel.appendChild(ph);
+CONTRACTS.forEach(c => {
+  const o = document.createElement('option');
+  o.value = c.code;
+  o.textContent = c.label;
+  if (c.disabled) { o.disabled = true; o.style.color = '#5a6280'; o.style.fontWeight = '600'; }
+  sel.appendChild(o);
+});
+sel.value = '099741';
+
+// ── STATE ──────────────────────────────────────────────────────────────────
+let weeks = 13;
+let allData = [];
+let charts = {};
+
+// ── TABS ───────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    weeks = parseInt(btn.dataset.w);
+    if (allData.length) render();
+  });
+});
+
+sel.addEventListener('change', load);
+
+// ── HELPERS ────────────────────────────────────────────────────────────────
+function fmtK(n) {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  n = Math.round(n);
+  if (Math.abs(n) >= 1_000_000) return (n/1_000_000).toFixed(2) + 'M';
+  if (Math.abs(n) >= 1_000)     return (n/1_000).toFixed(1) + 'K';
+  return n.toLocaleString();
+}
+
+function setMetric(vId, dId, val, prev, invertDelta = false) {
+  document.getElementById(vId).textContent = fmtK(val);
+  const dEl = document.getElementById(dId);
+  if (prev !== null && !isNaN(prev)) {
+    const d = Math.round(val - prev);
+    const positive = invertDelta ? d <= 0 : d >= 0;
+    dEl.textContent = (d >= 0 ? '▲ +' : '▼ ') + fmtK(d);
+    dEl.className = 'metric-delta ' + (d === 0 ? 'flat' : positive ? 'up' : 'down');
+  } else {
+    dEl.textContent = '—'; dEl.className = 'metric-delta flat';
+  }
+}
+
+// ── FETCH ──────────────────────────────────────────────────────────────────
+async function load() {
+  const code = sel.value;
+  if (!code) return;
+
+  document.getElementById('status-msg').textContent = 'Завантаження...';
+  document.getElementById('breakdown').innerHTML =
+    '<div class="state loading"><span class="spinner"></span>Запит до CFTC...</div>';
+
+  const limit = weeks === 0 ? 260 : Math.max(weeks + 4, 60);
+
+  try {
+    // Use /api/cot proxy on Vercel; fallback to direct CFTC (for local dev via browser)
+    const proxyUrl  = `/api/cot?code=${code}&limit=${limit}`;
+    const directUrl = `https://publicreporting.cftc.gov/api/explore/v2.1/catalog/datasets/cot-reports/records`
+      + `?where=cftc_commodity_code%3D%22${code}%22`
+      + `&order_by=report_date_as_yyyy_mm_dd%20desc`
+      + `&limit=${limit}`
+      + `&select=report_date_as_yyyy_mm_dd,open_interest_all,noncomm_positions_long_all,noncomm_positions_short_all,comm_positions_long_all,comm_positions_short_all`;
+
+    let resp = await fetch(proxyUrl);
+    if (!resp.ok) resp = await fetch(directUrl);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+
+    const json = await resp.json();
+    if (!json.results?.length) throw new Error('Немає даних для цього контракту');
+
+    allData = json.results.reverse();
+    const name = CONTRACTS.find(c => c.code === code)?.label || code;
+    document.getElementById('status-msg').textContent = name;
+    render();
+  } catch(e) {
+    document.getElementById('status-msg').textContent = 'Помилка';
+    document.getElementById('breakdown').innerHTML =
+      `<div class="state error"><div class="icon">⚠</div>${e.message}<br><br>
+       <small style="color:var(--muted)">Перевірте, що сайт задеплоєний на Vercel.<br>
+       Для локального тесту потрібен запущений сервер.</small></div>`;
+  }
+}
+
+// ── RENDER ─────────────────────────────────────────────────────────────────
+function render() {
+  const data = weeks === 0 ? allData : allData.slice(-weeks);
+  if (!data.length) return;
+
+  const last = data.at(-1);
+  const prev = data.at(-2) || null;
+
+  const g  = k => parseFloat(last[k]) || 0;
+  const gp = k => prev ? (parseFloat(prev[k]) || 0) : null;
+
+  const nl  = g('noncomm_positions_long_all');
+  const ns  = g('noncomm_positions_short_all');
+  const cl  = g('comm_positions_long_all');
+  const cs  = g('comm_positions_short_all');
+  const oi  = g('open_interest_all');
+  const net = nl - ns;
+
+  // nav date
+  document.getElementById('nav-date').textContent = last.report_date_as_yyyy_mm_dd || '—';
+  document.getElementById('status-date').textContent = '📅 ' + (last.report_date_as_yyyy_mm_dd || '—');
+  document.getElementById('status-rows').textContent = `${data.length} тижнів`;
+
+  // metrics
+  setMetric('mv-nl', 'md-nl', nl, gp('noncomm_positions_long_all'));
+  setMetric('mv-ns', 'md-ns', ns, gp('noncomm_positions_short_all'), true);
+  setMetric('mv-cl', 'md-cl', cl, gp('comm_positions_long_all'));
+  setMetric('mv-cs', 'md-cs', cs, gp('comm_positions_short_all'), true);
+  setMetric('mv-net','md-net',net, prev ? (parseFloat(prev.noncomm_positions_long_all)-parseFloat(prev.noncomm_positions_short_all)) : null);
+  setMetric('mv-oi', 'md-oi', oi, gp('open_interest_all'));
+  document.getElementById('mv-net').style.color = net >= 0 ? 'var(--green)' : 'var(--red)';
+
+  // chart data
+  const labels = data.map(d => d.report_date_as_yyyy_mm_dd?.slice(5) || '');
+  const nlArr  = data.map(d => parseFloat(d.noncomm_positions_long_all) || 0);
+  const nsArr  = data.map(d => parseFloat(d.noncomm_positions_short_all) || 0);
+  const clArr  = data.map(d => parseFloat(d.comm_positions_long_all) || 0);
+  const csArr  = data.map(d => parseFloat(d.comm_positions_short_all) || 0);
+  const netArr = nlArr.map((v,i) => v - nsArr[i]);
+  const oiArr  = data.map(d => parseFloat(d.open_interest_all) || 0);
+
+  const GRID  = 'rgba(255,255,255,0.04)';
+  const TICK  = { color:'#5a6280', font:{ size:10, family:'Geist Mono, monospace' }, maxRotation:0, autoSkip:true, maxTicksLimit:10 };
+  const TT    = { backgroundColor:'#1a1e28', titleColor:'#8490b0', bodyColor:'#f0f2f8', borderColor:'rgba(255,255,255,0.1)', borderWidth:1, padding:10, callbacks:{ label: ctx => `${ctx.dataset.label}: ${fmtK(ctx.raw)}` } };
+
+  // destroy old
+  Object.values(charts).forEach(c => c.destroy());
+  charts = {};
+
+  // positions chart
+  charts.pos = new Chart(document.getElementById('posChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label:'Нек. Long',  data:nlArr, borderColor:'#4f8ef7', borderWidth:2,   tension:0.35, pointRadius:0, fill:false },
+        { label:'Нек. Short', data:nsArr, borderColor:'#f75f5f', borderWidth:2,   tension:0.35, pointRadius:0, fill:false },
+        { label:'Ком. Long',  data:clArr, borderColor:'#f7c04f', borderWidth:1.5, tension:0.35, pointRadius:0, fill:false, borderDash:[5,4] },
+        { label:'Ком. Short', data:csArr, borderColor:'#9f7afa', borderWidth:1.5, tension:0.35, pointRadius:0, fill:false, borderDash:[5,4] },
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      interaction:{ mode:'index', intersect:false },
+      plugins:{ legend:{display:false}, tooltip:TT },
+      scales:{
+        x:{ grid:{ color:GRID }, ticks:TICK },
+        y:{ grid:{ color:GRID }, ticks:{ ...TICK, callback: v => fmtK(v) } }
+      }
+    }
+  });
+
+  // net chart
+  const netColors = netArr.map(v => v >= 0 ? 'rgba(61,214,140,0.65)' : 'rgba(247,95,95,0.65)');
+  charts.net = new Chart(document.getElementById('netChart'), {
+    type: 'bar',
+    data: { labels, datasets: [{ label:'Net Spec.', data:netArr, backgroundColor:netColors, borderWidth:0, borderRadius:2 }] },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{ ...TT, callbacks:{ label: ctx => `Net: ${fmtK(ctx.raw)}` } } },
+      scales:{
+        x:{ grid:{ color:GRID }, ticks:TICK },
+        y:{ grid:{ color:GRID }, ticks:{ ...TICK, callback: v => fmtK(v) } }
+      }
+    }
+  });
+
+  // oi chart
+  charts.oi = new Chart(document.getElementById('oiChart'), {
+    type: 'line',
+    data: { labels, datasets: [{ label:'Open Interest', data:oiArr, borderColor:'#4fc8f7', borderWidth:2, tension:0.35, pointRadius:0, fill:true, backgroundColor:'rgba(79,200,247,0.08)' }] },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{ ...TT, callbacks:{ label: ctx => `OI: ${fmtK(ctx.raw)}` } } },
+      scales:{
+        x:{ grid:{ color:GRID }, ticks:TICK },
+        y:{ grid:{ color:GRID }, ticks:{ ...TICK, callback: v => fmtK(v) } }
+      }
+    }
+  });
+
+  // breakdown bars
+  const allVals = [nl, ns, cl, cs];
+  const maxVal  = Math.max(...allVals) || 1;
+  const total   = allVals.reduce((a,b)=>a+b,0) || 1;
+  const rows = [
+    { label:'Нек. Long',  val:nl, color:'#4f8ef7' },
+    { label:'Нек. Short', val:ns, color:'#f75f5f' },
+    { label:'Ком. Long',  val:cl, color:'#f7c04f' },
+    { label:'Ком. Short', val:cs, color:'#9f7afa' },
+  ];
+  document.getElementById('breakdown').innerHTML = `<div class="breakdown">${
+    rows.map(r => `
+      <div class="br-row">
+        <div class="br-label">${r.label}</div>
+        <div class="br-track">
+          <div class="br-fill" style="width:${(r.val/maxVal*100).toFixed(1)}%;background:${r.color}"></div>
+        </div>
+        <div class="br-val">${fmtK(r.val)} <span style="color:var(--muted)">${(r.val/total*100).toFixed(1)}%</span></div>
+      </div>`
+    ).join('')
+  }</div>`;
+}
+
+// auto load on start
+load();
+</script>
+</body>
+</html>
