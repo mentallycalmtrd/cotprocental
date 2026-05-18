@@ -1,770 +1,348 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>COT Dashboard · by sheewchukk</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <style>
-    :root {
-      --bg:       #0d0f14;
-      --surface:  #13161e;
-      --surface2: #1a1e28;
-      --border:   rgba(255,255,255,0.06);
-      --border2:  rgba(255,255,255,0.12);
-      --text:     #f0f2f8;
-      --muted:    #5a6280;
-      --muted2:   #8490b0;
-
-      --blue:     #4f8ef7;
-      --blue-dim: rgba(79,142,247,0.15);
-      --red:      #f75f5f;
-      --red-dim:  rgba(247,95,95,0.15);
-      --green:    #3dd68c;
-      --green-dim:rgba(61,214,140,0.15);
-      --yellow:   #f7c04f;
-      --purple:   #9f7afa;
-      --cyan:     #4fc8f7;
-
-      --radius:   10px;
-      --radius-lg:14px;
-    }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Geist', sans-serif;
-      font-size: 14px;
-      line-height: 1.6;
-      min-height: 100vh;
-    }
-
-    /* ── TOP NAV ── */
-    nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(13,15,20,0.85);
-      backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--border);
-      padding: 0 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 56px;
-    }
-
-    .nav-brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .nav-logo {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--text);
-      letter-spacing: -0.3px;
-    }
-
-    .nav-badge {
-      font-size: 11px;
-      font-weight: 500;
-      padding: 2px 8px;
-      border-radius: 20px;
-      background: var(--blue-dim);
-      color: var(--blue);
-      border: 1px solid rgba(79,142,247,0.25);
-      letter-spacing: 0.2px;
-    }
-
-    .nav-right {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .live-dot {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      color: var(--green);
-      font-size: 12px;
-      font-weight: 500;
-    }
-    .live-dot::before {
-      content: '';
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--green);
-      box-shadow: 0 0 0 0 rgba(61,214,140,0.4);
-      animation: ping 2s ease-in-out infinite;
-    }
-    @keyframes ping {
-      0%,100% { box-shadow: 0 0 0 0 rgba(61,214,140,0.4); }
-      50%      { box-shadow: 0 0 0 5px rgba(61,214,140,0); }
-    }
-
-    /* ── PAGE ── */
-    .page { max-width: 1140px; margin: 0 auto; padding: 28px 24px 60px; }
-
-    /* ── CONTROLS BAR ── */
-    .controls {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      flex-wrap: wrap;
-      margin-bottom: 24px;
-    }
-
-    .select-wrap {
-      position: relative;
-      flex: 1;
-      min-width: 260px;
-      max-width: 400px;
-    }
-    .select-wrap::after {
-      content: '';
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 0; height: 0;
-      border-left: 4px solid transparent;
-      border-right: 4px solid transparent;
-      border-top: 5px solid var(--muted);
-      pointer-events: none;
-    }
-
-    select {
-      width: 100%;
-      appearance: none;
-      background: var(--surface);
-      border: 1px solid var(--border2);
-      border-radius: var(--radius);
-      color: var(--text);
-      font-family: 'Geist', sans-serif;
-      font-size: 13px;
-      font-weight: 500;
-      padding: 10px 36px 10px 14px;
-      cursor: pointer;
-      outline: none;
-      transition: border-color 0.15s;
-    }
-    select:focus { border-color: var(--blue); }
-
-    .tabs {
-      display: flex;
-      background: var(--surface);
-      border: 1px solid var(--border2);
-      border-radius: var(--radius);
-      padding: 3px;
-      gap: 2px;
-    }
-    .tab {
-      font-family: 'Geist', sans-serif;
-      font-size: 12px;
-      font-weight: 500;
-      padding: 6px 14px;
-      border-radius: 7px;
-      border: none;
-      background: transparent;
-      color: var(--muted2);
-      cursor: pointer;
-      transition: all 0.15s;
-      white-space: nowrap;
-    }
-    .tab:hover { color: var(--text); }
-    .tab.active {
-      background: var(--blue);
-      color: #fff;
-      box-shadow: 0 2px 8px rgba(79,142,247,0.35);
-    }
-
-    /* ── STATUS CHIP ── */
-    .status-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 20px;
-      font-size: 12px;
-      color: var(--muted2);
-      flex-wrap: wrap;
-    }
-    .status-chip {
-      padding: 3px 10px;
-      border-radius: 20px;
-      background: var(--surface2);
-      border: 1px solid var(--border2);
-      font-size: 11px;
-    }
-    #status-date { color: var(--cyan); }
-
-    /* ── METRICS ── */
-    .metrics {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-
-    .metric {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 16px 18px;
-      transition: border-color 0.2s, transform 0.2s;
-      cursor: default;
-    }
-    .metric:hover { border-color: var(--border2); transform: translateY(-1px); }
-
-    .metric-label {
-      font-size: 11px;
-      font-weight: 500;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      margin-bottom: 8px;
-    }
-    .metric-value {
-      font-family: 'Geist Mono', monospace;
-      font-size: 22px;
-      font-weight: 500;
-      color: var(--text);
-      line-height: 1;
-      margin-bottom: 6px;
-    }
-    .metric-delta {
-      font-size: 11px;
-      font-family: 'Geist Mono', monospace;
-      display: flex;
-      align-items: center;
-      gap: 3px;
-    }
-    .metric-delta.up   { color: var(--green); }
-    .metric-delta.down { color: var(--red); }
-    .metric-delta.flat { color: var(--muted); }
-
-    /* color accents on metric top border */
-    .metric[data-color="blue"]   { border-top: 2px solid var(--blue);   }
-    .metric[data-color="red"]    { border-top: 2px solid var(--red);    }
-    .metric[data-color="yellow"] { border-top: 2px solid var(--yellow); }
-    .metric[data-color="purple"] { border-top: 2px solid var(--purple); }
-    .metric[data-color="cyan"]   { border-top: 2px solid var(--cyan);   }
-    .metric[data-color="green"]  { border-top: 2px solid var(--green);  }
-
-    /* ── CHARTS GRID ── */
-    .charts-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-    @media (max-width: 700px) { .charts-grid { grid-template-columns: 1fr; } }
-
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 20px;
-    }
-    .card.wide { grid-column: 1 / -1; }
-
-    .card-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .card-title {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--muted2);
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-    }
-
-    .legend {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-    .leg {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 11px;
-      color: var(--muted2);
-    }
-    .leg-sq {
-      width: 8px; height: 8px;
-      border-radius: 2px;
-      flex-shrink: 0;
-    }
-
-    .chart-wrap { position: relative; width: 100%; }
-
-    /* ── BREAKDOWN BARS ── */
-    .breakdown { display: flex; flex-direction: column; gap: 10px; }
-    .br-row {
-      display: grid;
-      grid-template-columns: 110px 1fr 100px;
-      align-items: center;
-      gap: 12px;
-    }
-    .br-label {
-      font-size: 11px;
-      color: var(--muted2);
-      text-align: right;
-      font-weight: 500;
-    }
-    .br-track {
-      height: 8px;
-      background: var(--surface2);
-      border-radius: 4px;
-      overflow: hidden;
-    }
-    .br-fill {
-      height: 100%;
-      border-radius: 4px;
-      transition: width 0.7s cubic-bezier(.4,0,.2,1);
-    }
-    .br-val {
-      font-family: 'Geist Mono', monospace;
-      font-size: 11px;
-      color: var(--muted2);
-    }
-
-    /* ── LOADING / ERROR ── */
-    .state {
-      text-align: center;
-      padding: 48px 20px;
-      font-size: 13px;
-    }
-    .state.loading { color: var(--cyan); }
-    .state.error   { color: var(--red); }
-    .state .icon { font-size: 28px; margin-bottom: 12px; }
-
-    /* ── SPINNER ── */
-    .spinner {
-      width: 20px; height: 20px;
-      border: 2px solid var(--border2);
-      border-top-color: var(--cyan);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      display: inline-block;
-      vertical-align: middle;
-      margin-right: 8px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── FOOTER ── */
-    footer {
-      margin-top: 40px;
-      padding-top: 20px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
-      font-size: 11px;
-      color: var(--muted);
-    }
-    footer a { color: var(--blue); text-decoration: none; }
-    footer a:hover { text-decoration: underline; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COT Dashboard · by sheewchukk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{--bg:#0a0a0c;--surface:#111114;--surface2:#18181d;--border:#222228;--border2:#2a2a32;--text:#e8e8f0;--muted:#555566;--muted2:#888899;--accent:#c8ff00;--am:#3db8ff;--lf:#ff6b35;--dealer:#a855f7;--other:#22d3a5;--green:#22c55e;--red:#ef4444;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;line-height:1.5;min-height:100vh}
+header{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:52px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:baseline;gap:10px}
+.logo-name{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--accent);letter-spacing:.05em}
+.logo-sub{font-size:11px;color:var(--muted);font-family:var(--mono)}
+.header-right{display:flex;align-items:center;gap:12px}
+.hbadge{font-family:var(--mono);font-size:10px;color:var(--muted);padding:3px 8px;border:1px solid var(--border2);border-radius:3px;letter-spacing:.06em;display:flex;align-items:center;gap:6px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--muted);flex-shrink:0}
+.dot.live{background:var(--green);box-shadow:0 0 6px var(--green)}
+.toolbar{display:flex;align-items:center;gap:12px;padding:10px 24px;border-bottom:1px solid var(--border);background:var(--surface);flex-wrap:wrap}
+.sw{position:relative}
+select{appearance:none;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:var(--sans);font-size:13px;padding:7px 32px 7px 12px;border-radius:4px;cursor:pointer;outline:none;min-width:220px;transition:border-color .15s}
+select:hover{border-color:var(--muted)}
+select:focus{border-color:var(--accent)}
+.sa{position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted);font-size:10px}
+.tl{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+.bg{display:flex;border:1px solid var(--border2);border-radius:4px;overflow:hidden}
+.btn{background:var(--surface2);border:none;color:var(--muted2);font-family:var(--mono);font-size:11px;padding:7px 13px;cursor:pointer;transition:all .15s;letter-spacing:.05em}
+.btn:hover{background:var(--border2);color:var(--text)}
+.btn.active{background:var(--accent);color:#000;font-weight:600}
+.btn+.btn{border-left:1px solid var(--border2)}
+.main{max-width:1400px;margin:0 auto;padding:24px;display:flex;flex-direction:column;gap:20px}
+.stat-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.sc{background:var(--surface);padding:16px;display:flex;flex-direction:column;gap:6px}
+.sl{font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+.sv{font-family:var(--mono);font-size:20px;font-weight:600;color:var(--text)}
+.sd{font-family:var(--mono);font-size:11px;color:var(--muted2)}
+.sd.pos{color:var(--green)}.sd.neg{color:var(--red)}
+.sbar{height:2px;background:var(--border2);border-radius:1px;margin-top:4px;overflow:hidden}
+.sbf{height:100%;border-radius:1px;transition:width .4s ease}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.ph{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid var(--border)}
+.pt{font-family:var(--mono);font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em}
+.leg{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.li{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--muted2)}
+.ld{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.pb{padding:18px}
+.cw{position:relative;height:220px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.pct-wrap{padding:18px;display:flex;flex-direction:column;gap:12px}
+.pr{display:grid;grid-template-columns:90px 1fr 48px;align-items:center;gap:12px}
+.pl{font-family:var(--mono);font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.05em}
+.pt2{height:6px;background:var(--border2);border-radius:3px;overflow:hidden}
+.pf{height:100%;border-radius:3px;transition:width .5s ease}
+.pv{font-family:var(--mono);font-size:11px;font-weight:600;text-align:right}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px}
+thead tr{border-bottom:1px solid var(--border2)}
+th{padding:10px 14px;text-align:right;color:var(--muted);font-weight:500;font-size:9px;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
+th:first-child{text-align:left}
+td{padding:9px 14px;text-align:right;color:var(--text);border-bottom:1px solid var(--border);white-space:nowrap}
+td:first-child{text-align:left;color:var(--muted2)}
+tbody tr:hover{background:var(--surface2)}
+tbody tr:last-child td{border-bottom:none}
+.tp{color:var(--green)}.tn{color:var(--red)}.tam{color:var(--am)}.tlf{color:var(--lf)}.td{color:var(--dealer)}
+.tvw{height:420px}
+.ls{display:flex;align-items:center;justify-content:center;height:200px;gap:10px;color:var(--muted);font-family:var(--mono);font-size:11px}
+.sp{width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+footer{text-align:center;padding:20px;color:var(--muted);font-family:var(--mono);font-size:10px;border-top:1px solid var(--border);letter-spacing:.04em}
+footer a{color:var(--muted2);text-decoration:none}
+footer a:hover{color:var(--text)}
+@media(max-width:1000px){.stat-grid{grid-template-columns:repeat(3,1fr)}.two{grid-template-columns:1fr}.main{padding:16px}}
+@media(max-width:600px){.stat-grid{grid-template-columns:repeat(2,1fr)}header{padding:0 16px}.toolbar{padding:8px 16px}}
+</style>
 </head>
 <body>
-
-<!-- NAV -->
-<nav>
-  <div class="nav-brand">
-    <span class="nav-logo">COT Dashboard</span>
-    <span class="nav-badge">CFTC</span>
+<header>
+  <div class="logo">
+    <span class="logo-name">COT DASHBOARD</span>
+    <span class="logo-sub">by sheewchukk</span>
   </div>
-  <div class="nav-right">
-    <span id="nav-date" style="font-family:'Geist Mono',monospace">—</span>
-    <span class="live-dot">Live</span>
+  <div class="header-right">
+    <span class="hbadge" id="last-update">—</span>
+    <span class="hbadge"><span class="dot" id="sdot"></span><span id="stxt">—</span></span>
+    <span class="hbadge">CFTC · TFF</span>
   </div>
-</nav>
-
-<div class="page">
-
-  <!-- CONTROLS -->
-  <div class="controls">
-    <div class="select-wrap">
-      <select id="contractSel"></select>
-    </div>
-    <div class="tabs" id="periodTabs">
-      <button class="tab active" data-w="13">13W</button>
-      <button class="tab" data-w="26">26W</button>
-      <button class="tab" data-w="52">52W</button>
-      <button class="tab" data-w="0">ALL</button>
-    </div>
+</header>
+<div class="toolbar">
+  <div class="sw"><select id="contractSel"></select><span class="sa">▾</span></div>
+  <span class="tl">Горизонт</span>
+  <div class="bg" id="wg">
+    <button class="btn" data-w="13">13W</button>
+    <button class="btn active" data-w="26">26W</button>
+    <button class="btn" data-w="52">52W</button>
+    <button class="btn" data-w="0">ALL</button>
   </div>
-
-  <!-- STATUS -->
-  <div class="status-row">
-    <span class="status-chip live-dot">CFTC · Commitments of Traders</span>
-    <span class="status-chip" id="status-date">—</span>
-    <span class="status-chip" id="status-rows">—</span>
-    <span id="status-msg" style="margin-left:4px; color:var(--muted)">Оберіть контракт</span>
+</div>
+<div class="main">
+  <!-- STAT CARDS -->
+  <div class="stat-grid">
+    <div class="sc"><div class="sl">Asset Mgrs Net</div><div class="sv" id="s-am">—</div><div class="sd" id="d-am">—</div><div class="sbar"><div class="sbf" id="b-am" style="background:var(--am);width:0%"></div></div></div>
+    <div class="sc"><div class="sl">Lev. Funds Net</div><div class="sv" id="s-lf">—</div><div class="sd" id="d-lf">—</div><div class="sbar"><div class="sbf" id="b-lf" style="background:var(--lf);width:0%"></div></div></div>
+    <div class="sc"><div class="sl">Dealers Net</div><div class="sv" id="s-d">—</div><div class="sd" id="d-d">—</div><div class="sbar"><div class="sbf" id="b-d" style="background:var(--dealer);width:0%"></div></div></div>
+    <div class="sc"><div class="sl">Other Rept. Net</div><div class="sv" id="s-o">—</div><div class="sd" id="d-o">—</div><div class="sbar"><div class="sbf" id="b-o" style="background:var(--other);width:0%"></div></div></div>
+    <div class="sc"><div class="sl">Open Interest</div><div class="sv" id="s-oi">—</div><div class="sd" id="d-oi">—</div><div class="sbar"><div class="sbf" id="b-oi" style="background:var(--muted2);width:50%"></div></div></div>
+    <div class="sc"><div class="sl">AM Percentile 3Y</div><div class="sv" id="s-pct">—</div><div class="sd" style="color:var(--muted)">rolling 156w rank</div><div class="sbar"><div class="sbf" id="b-pct" style="background:var(--accent);width:0%"></div></div></div>
   </div>
 
-  <!-- METRICS -->
-  <div class="metrics">
-    <div class="metric" data-color="blue">
-      <div class="metric-label">Нек. Long</div>
-      <div class="metric-value" id="mv-nl">—</div>
-      <div class="metric-delta flat" id="md-nl">—</div>
-    </div>
-    <div class="metric" data-color="red">
-      <div class="metric-label">Нек. Short</div>
-      <div class="metric-value" id="mv-ns">—</div>
-      <div class="metric-delta flat" id="md-ns">—</div>
-    </div>
-    <div class="metric" data-color="yellow">
-      <div class="metric-label">Ком. Long</div>
-      <div class="metric-value" id="mv-cl">—</div>
-      <div class="metric-delta flat" id="md-cl">—</div>
-    </div>
-    <div class="metric" data-color="purple">
-      <div class="metric-label">Ком. Short</div>
-      <div class="metric-value" id="mv-cs">—</div>
-      <div class="metric-delta flat" id="md-cs">—</div>
-    </div>
-    <div class="metric" data-color="cyan">
-      <div class="metric-label">Net Speculative</div>
-      <div class="metric-value" id="mv-net">—</div>
-      <div class="metric-delta flat" id="md-net">—</div>
-    </div>
-    <div class="metric" data-color="green">
-      <div class="metric-label">Open Interest</div>
-      <div class="metric-value" id="mv-oi">—</div>
-      <div class="metric-delta flat" id="md-oi">—</div>
-    </div>
-  </div>
-
-  <!-- CHARTS -->
-  <div class="charts-grid">
-
-    <div class="card wide">
-      <div class="card-head">
-        <span class="card-title">Позиції по тижнях</span>
-        <div class="legend">
-          <div class="leg"><span class="leg-sq" style="background:#4f8ef7"></span>Нек. Long</div>
-          <div class="leg"><span class="leg-sq" style="background:#f75f5f"></span>Нек. Short</div>
-          <div class="leg"><span class="leg-sq" style="background:#f7c04f; opacity:.8"></span>Ком. Long</div>
-          <div class="leg"><span class="leg-sq" style="background:#9f7afa; opacity:.8"></span>Ком. Short</div>
-        </div>
-      </div>
-      <div class="chart-wrap" style="height:240px">
-        <canvas id="posChart" role="img" aria-label="Позиції COT по тижнях">Дані позицій</canvas>
+  <!-- POSITIONS CHART -->
+  <div class="panel">
+    <div class="ph">
+      <span class="pt">NET позиції по тижнях</span>
+      <div class="leg">
+        <span class="li"><span class="ld" style="background:var(--am)"></span>Asset Mgrs</span>
+        <span class="li"><span class="ld" style="background:var(--lf)"></span>Lev. Funds</span>
+        <span class="li"><span class="ld" style="background:var(--dealer)"></span>Dealers</span>
       </div>
     </div>
-
-    <div class="card">
-      <div class="card-head">
-        <span class="card-title">Net Speculative</span>
-        <div class="legend">
-          <div class="leg"><span class="leg-sq" style="background:#3dd68c"></span>Bullish</div>
-          <div class="leg"><span class="leg-sq" style="background:#f75f5f"></span>Bearish</div>
-        </div>
-      </div>
-      <div class="chart-wrap" style="height:200px">
-        <canvas id="netChart" role="img" aria-label="Net Speculative позиція">Net позиція</canvas>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-head">
-        <span class="card-title">Open Interest</span>
-      </div>
-      <div class="chart-wrap" style="height:200px">
-        <canvas id="oiChart" role="img" aria-label="Open Interest">Open Interest</canvas>
-      </div>
-    </div>
-
+    <div class="pb"><div class="cw"><canvas id="posChart"></canvas></div></div>
   </div>
 
-  <!-- BREAKDOWN -->
-  <div class="card" style="margin-bottom:12px">
-    <div class="card-head"><span class="card-title">Розподіл — останній звіт</span></div>
-    <div id="breakdown"><div class="state loading"><span class="spinner"></span>Оберіть контракт для завантаження даних</div></div>
+  <!-- PERCENTILE + OI -->
+  <div class="two">
+    <div class="panel">
+      <div class="ph"><span class="pt">Процентиль (rolling 3Y · 156 тижнів)</span></div>
+      <div class="pct-wrap" id="pct-wrap"><div class="ls"><div class="sp"></div>Завантаження...</div></div>
+    </div>
+    <div class="panel">
+      <div class="ph"><span class="pt">Open Interest</span></div>
+      <div class="pb"><div class="cw"><canvas id="oiChart"></canvas></div></div>
+    </div>
   </div>
 
-  <!-- FOOTER -->
-  <footer>
-    <span>COT Dashboard · by <strong>sheewchukk</strong></span>
-    <span>Дані: <a href="https://publicreporting.cftc.gov" target="_blank">publicreporting.cftc.gov</a> · щоп'ятниці ~15:30 ET · позиції вівторка</span>
-  </footer>
+  <!-- TRADINGVIEW -->
+  <div class="panel">
+    <div class="ph">
+      <span class="pt">Графік ціни · Weekly</span>
+      <span id="tv-sym" style="font-family:var(--mono);font-size:10px;color:var(--muted)">—</span>
+    </div>
+    <div class="tvw" id="tv-box"></div>
+  </div>
 
+  <!-- TABLE -->
+  <div class="panel">
+    <div class="ph">
+      <span class="pt">Last 20 Reports</span>
+      <span style="font-family:var(--mono);font-size:9px;color:var(--muted)">Δ = зміна тиждень/тиждень &nbsp;·&nbsp; <span style="color:var(--green)">▲ net long</span> &nbsp;·&nbsp; <span style="color:var(--red)">▼ net short</span></span>
+    </div>
+    <div class="tw" id="tbl"><div class="ls"><div class="sp"></div>Завантаження...</div></div>
+  </div>
 </div>
 
+<footer>COT Dashboard &middot; by sheewchukk &middot; Дані: <a href="https://publicreporting.cftc.gov" target="_blank">CFTC Traders in Financial Futures</a> &middot; щоп'ятниці ~15:30 ET &middot; позиції вівторка</footer>
+
 <script>
-// ── CONTRACTS ──────────────────────────────────────────────────────────────
-const CONTRACTS = [
-  { label:'── Валюти ──',             code:'', disabled:true },
-  { label:'EUR/USD — Euro FX',        code:'099741' },
-  { label:'GBP/USD — British Pound',  code:'096742' },
-  { label:'JPY/USD — Japanese Yen',   code:'097741' },
-  { label:'CHF/USD — Swiss Franc',    code:'092741' },
-  { label:'CAD/USD — Canadian Dollar',code:'090741' },
-  { label:'AUD/USD — Australian Dollar',code:'232741'},
-  { label:'NZD/USD — New Zealand Dollar',code:'112741'},
-  { label:'US Dollar Index (ICE)',    code:'098662' },
-  { label:'── Метали ──',             code:'', disabled:true },
-  { label:'Gold (COMEX)',             code:'088691' },
-  { label:'Silver (COMEX)',           code:'084691' },
-  { label:'Copper (COMEX)',           code:'085692' },
-  { label:'── Енергоносії ──',        code:'', disabled:true },
-  { label:'WTI Crude Oil (NYMEX)',    code:'067651' },
-  { label:'Natural Gas (NYMEX)',      code:'023651' },
-  { label:'── Індекси ──',            code:'', disabled:true },
-  { label:'S&P 500 E-mini (CME)',     code:'13874A' },
-  { label:'Nasdaq 100 E-mini (CME)',  code:'20974P' },
-  { label:'Dow Jones E-mini (CBOT)',  code:'12460P' },
-  { label:'── Облігації ──',          code:'', disabled:true },
-  { label:'10-Year T-Note (CBOT)',    code:'043602' },
-  { label:'2-Year T-Note (CBOT)',     code:'042601' },
-  { label:'── Крипто ──',             code:'', disabled:true },
-  { label:'Bitcoin (CME)',            code:'133741' },
-  { label:'Ether (CME)',              code:'23066A' },
-  { label:'── Агро ──',               code:'', disabled:true },
-  { label:'Corn (CBOT)',              code:'002602' },
-  { label:'Wheat (CBOT)',             code:'001602' },
-  { label:'Soybeans (CBOT)',          code:'005602' },
-  { label:'Sugar #11 (ICE)',          code:'080732' },
-  { label:'Coffee (ICE)',             code:'083731' },
+const CONTRACTS=[
+  {label:'── Валюти ──',code:'',tv:'',disabled:true},
+  {label:'EUR/USD — Euro FX',code:'099741',tv:'FX:EURUSD'},
+  {label:'GBP/USD — British Pound',code:'096742',tv:'FX:GBPUSD'},
+  {label:'JPY/USD — Japanese Yen',code:'097741',tv:'FX:USDJPY'},
+  {label:'CHF/USD — Swiss Franc',code:'092741',tv:'FX:USDCHF'},
+  {label:'CAD/USD — Canadian Dollar',code:'090741',tv:'FX:USDCAD'},
+  {label:'AUD/USD — Australian Dollar',code:'232741',tv:'FX:AUDUSD'},
+  {label:'NZD/USD — New Zealand Dollar',code:'112741',tv:'FX:NZDUSD'},
+  {label:'US Dollar Index (ICE)',code:'098662',tv:'TVC:DXY'},
+  {label:'── Метали ──',code:'',tv:'',disabled:true},
+  {label:'Gold (COMEX)',code:'088691',tv:'COMEX:GC1!'},
+  {label:'Silver (COMEX)',code:'084691',tv:'COMEX:SI1!'},
+  {label:'Copper (COMEX)',code:'085692',tv:'COMEX:HG1!'},
+  {label:'── Енергоносії ──',code:'',tv:'',disabled:true},
+  {label:'WTI Crude Oil (NYMEX)',code:'067651',tv:'NYMEX:CL1!'},
+  {label:'Natural Gas (NYMEX)',code:'023651',tv:'NYMEX:NG1!'},
+  {label:'── Індекси ──',code:'',tv:'',disabled:true},
+  {label:'S&P 500 E-mini (CME)',code:'13874A',tv:'CME_MINI:ES1!'},
+  {label:'Nasdaq 100 E-mini (CME)',code:'20974P',tv:'CME_MINI:NQ1!'},
+  {label:'Dow Jones E-mini (CBOT)',code:'12460P',tv:'CBOT_MINI:YM1!'},
+  {label:'── Облігації ──',code:'',tv:'',disabled:true},
+  {label:'10-Year T-Note (CBOT)',code:'043602',tv:'CBOT:ZN1!'},
+  {label:'2-Year T-Note (CBOT)',code:'042601',tv:'CBOT:ZT1!'},
+  {label:'── Крипто ──',code:'',tv:'',disabled:true},
+  {label:'Bitcoin (CME)',code:'133741',tv:'CME:BTC1!'},
+  {label:'Ether (CME)',code:'23066A',tv:'CME:ETH1!'},
+  {label:'── Агро ──',code:'',tv:'',disabled:true},
+  {label:'Corn (CBOT)',code:'002602',tv:'CBOT:ZC1!'},
+  {label:'Wheat (CBOT)',code:'001602',tv:'CBOT:ZW1!'},
+  {label:'Soybeans (CBOT)',code:'005602',tv:'CBOT:ZS1!'},
+  {label:'Sugar #11 (ICE)',code:'080732',tv:'ICEUSA:SB1!'},
+  {label:'Coffee (ICE)',code:'083731',tv:'ICEUSA:KC1!'},
 ];
 
-// populate select
-const sel = document.getElementById('contractSel');
-const ph = document.createElement('option');
-ph.value = ''; ph.textContent = '— Оберіть контракт —';
-sel.appendChild(ph);
-CONTRACTS.forEach(c => {
-  const o = document.createElement('option');
-  o.value = c.code;
-  o.textContent = c.label;
-  if (c.disabled) { o.disabled = true; o.style.color = '#5a6280'; o.style.fontWeight = '600'; }
-  sel.appendChild(o);
-});
-sel.value = '099741';
+let allData=[],weeks=26,charts={};
 
-// ── STATE ──────────────────────────────────────────────────────────────────
-let weeks = 13;
-let allData = [];
-let charts = {};
+const sel=document.getElementById('contractSel');
+CONTRACTS.forEach(c=>{const o=document.createElement('option');o.value=c.code;o.textContent=c.label;if(c.disabled)o.disabled=true;sel.appendChild(o);});
+sel.value='099741';
+sel.addEventListener('change',load);
 
-// ── TABS ───────────────────────────────────────────────────────────────────
-document.querySelectorAll('.tab').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    weeks = parseInt(btn.dataset.w);
-    if (allData.length) render();
-  });
+document.getElementById('wg').addEventListener('click',e=>{
+  const b=e.target.closest('.btn');if(!b)return;
+  document.querySelectorAll('#wg .btn').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');weeks=parseInt(b.dataset.w);render();
 });
 
-sel.addEventListener('change', load);
+const fmt=n=>{if(n===null||n===undefined||isNaN(n))return'—';const a=Math.abs(n);if(a>=1e6)return(n/1e6).toFixed(2)+'M';if(a>=1e3)return(n/1e3).toFixed(1)+'K';return n.toFixed(0);};
+const pctC=p=>p>=85?'#ef4444':p>=70?'#f97316':p<=15?'#22c55e':p<=30?'#86efac':'#c8ff00';
+const nett=(d,l,s)=>(parseFloat(d[l])||0)-(parseFloat(d[s])||0);
 
-// ── HELPERS ────────────────────────────────────────────────────────────────
-function fmtK(n) {
-  if (n === null || n === undefined || isNaN(n)) return '—';
-  n = Math.round(n);
-  if (Math.abs(n) >= 1_000_000) return (n/1_000_000).toFixed(2) + 'M';
-  if (Math.abs(n) >= 1_000)     return (n/1_000).toFixed(1) + 'K';
-  return n.toLocaleString();
-}
+function setDelta(el,v){if(v===null||isNaN(v)){el.textContent='—';el.className='sd';return;}const s=v>=0?'+':'';el.textContent=s+fmt(v);el.className='sd '+(v>0?'pos':v<0?'neg':'');}
 
-function setMetric(vId, dId, val, prev, invertDelta = false) {
-  document.getElementById(vId).textContent = fmtK(val);
-  const dEl = document.getElementById(dId);
-  if (prev !== null && !isNaN(prev)) {
-    const d = Math.round(val - prev);
-    const positive = invertDelta ? d <= 0 : d >= 0;
-    dEl.textContent = (d >= 0 ? '▲ +' : '▼ ') + fmtK(d);
-    dEl.className = 'metric-delta ' + (d === 0 ? 'flat' : positive ? 'up' : 'down');
-  } else {
-    dEl.textContent = '—'; dEl.className = 'metric-delta flat';
-  }
-}
-
-// ── FETCH ──────────────────────────────────────────────────────────────────
-async function load() {
-  const code = sel.value;
-  if (!code) return;
-
-  document.getElementById('status-msg').textContent = 'Завантаження...';
-  document.getElementById('breakdown').innerHTML =
-    '<div class="state loading"><span class="spinner"></span>Запит до CFTC...</div>';
-
-  const limit = weeks === 0 ? 260 : Math.max(weeks + 4, 60);
-
-  try {
-    // Use /api/cot proxy on Vercel; fallback to direct CFTC (for local dev via browser)
-    const proxyUrl  = `/api/cot?code=${code}&limit=${limit}`;
-    const directUrl = `https://publicreporting.cftc.gov/api/explore/v2.1/catalog/datasets/cot-reports/records`
-      + `?where=cftc_commodity_code%3D%22${code}%22`
-      + `&order_by=report_date_as_yyyy_mm_dd%20desc`
-      + `&limit=${limit}`
-      + `&select=report_date_as_yyyy_mm_dd,open_interest_all,noncomm_positions_long_all,noncomm_positions_short_all,comm_positions_long_all,comm_positions_short_all`;
-
-    let resp = await fetch(proxyUrl);
-    if (!resp.ok) resp = await fetch(directUrl);
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-
-    const json = await resp.json();
-    if (!json?.length) throw new Error('Немає даних для цього контракту');
-
-    allData = json.reverse();
-    const name = CONTRACTS.find(c => c.code === code)?.label || code;
-    document.getElementById('status-msg').textContent = name;
+async function load(){
+  const code=sel.value;if(!code)return;
+  document.getElementById('sdot').className='dot';
+  document.getElementById('stxt').textContent='Завантаження...';
+  const lim=weeks===0?260:Math.max(weeks+160,200);
+  try{
+    const r=await fetch('/api/cot?code='+code+'&limit='+lim+'&report=tff');
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const j=await r.json();
+    if(!Array.isArray(j)||!j.length)throw new Error('Немає даних');
+    allData=j.reverse();
+    document.getElementById('sdot').className='dot live';
+    const name=CONTRACTS.find(c=>c.code===code)?.label||code;
+    document.getElementById('stxt').textContent=name;
+    document.getElementById('last-update').textContent=allData.at(-1).report_date_as_yyyy_mm_dd?.slice(0,10)||'—';
+    loadTV(CONTRACTS.find(c=>c.code===code)?.tv||'');
     render();
-  } catch(e) {
-    document.getElementById('status-msg').textContent = 'Помилка';
-    document.getElementById('breakdown').innerHTML =
-      `<div class="state error"><div class="icon">⚠</div>${e.message}<br><br>
-       <small style="color:var(--muted)">Перевірте, що сайт задеплоєний на Vercel.<br>
-       Для локального тесту потрібен запущений сервер.</small></div>`;
+  }catch(e){
+    document.getElementById('stxt').textContent='Помилка: '+e.message;
   }
 }
 
-// ── RENDER ─────────────────────────────────────────────────────────────────
-function render() {
-  const data = weeks === 0 ? allData : allData.slice(-weeks);
-  if (!data.length) return;
-
-  const last = data.at(-1);
-  const prev = data.at(-2) || null;
-
-  const g  = k => parseFloat(last[k]) || 0;
-  const gp = k => prev ? (parseFloat(prev[k]) || 0) : null;
-
-  const nl  = g('noncomm_positions_long_all');
-  const ns  = g('noncomm_positions_short_all');
-  const cl  = g('comm_positions_long_all');
-  const cs  = g('comm_positions_short_all');
-  const oi  = g('open_interest_all');
-  const net = nl - ns;
-
-  // nav date
-  document.getElementById('nav-date').textContent = last.report_date_as_yyyy_mm_dd || '—';
-  document.getElementById('status-date').textContent = '📅 ' + (last.report_date_as_yyyy_mm_dd || '—');
-  document.getElementById('status-rows').textContent = `${data.length} тижнів`;
-
-  // metrics
-  setMetric('mv-nl', 'md-nl', nl, gp('noncomm_positions_long_all'));
-  setMetric('mv-ns', 'md-ns', ns, gp('noncomm_positions_short_all'), true);
-  setMetric('mv-cl', 'md-cl', cl, gp('comm_positions_long_all'));
-  setMetric('mv-cs', 'md-cs', cs, gp('comm_positions_short_all'), true);
-  setMetric('mv-net','md-net',net, prev ? (parseFloat(prev.noncomm_positions_long_all)-parseFloat(prev.noncomm_positions_short_all)) : null);
-  setMetric('mv-oi', 'md-oi', oi, gp('open_interest_all'));
-  document.getElementById('mv-net').style.color = net >= 0 ? 'var(--green)' : 'var(--red)';
-
-  // chart data
-  const labels = data.map(d => d.report_date_as_yyyy_mm_dd?.slice(5) || '');
-  const nlArr  = data.map(d => parseFloat(d.noncomm_positions_long_all) || 0);
-  const nsArr  = data.map(d => parseFloat(d.noncomm_positions_short_all) || 0);
-  const clArr  = data.map(d => parseFloat(d.comm_positions_long_all) || 0);
-  const csArr  = data.map(d => parseFloat(d.comm_positions_short_all) || 0);
-  const netArr = nlArr.map((v,i) => v - nsArr[i]);
-  const oiArr  = data.map(d => parseFloat(d.open_interest_all) || 0);
-
-  const GRID  = 'rgba(255,255,255,0.04)';
-  const TICK  = { color:'#5a6280', font:{ size:10, family:'Geist Mono, monospace' }, maxRotation:0, autoSkip:true, maxTicksLimit:10 };
-  const TT    = { backgroundColor:'#1a1e28', titleColor:'#8490b0', bodyColor:'#f0f2f8', borderColor:'rgba(255,255,255,0.1)', borderWidth:1, padding:10, callbacks:{ label: ctx => `${ctx.dataset.label}: ${fmtK(ctx.raw)}` } };
-
-  // destroy old
-  Object.values(charts).forEach(c => c.destroy());
-  charts = {};
-
-  // positions chart
-  charts.pos = new Chart(document.getElementById('posChart'), {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        { label:'Нек. Long',  data:nlArr, borderColor:'#4f8ef7', borderWidth:2,   tension:0.35, pointRadius:0, fill:false },
-        { label:'Нек. Short', data:nsArr, borderColor:'#f75f5f', borderWidth:2,   tension:0.35, pointRadius:0, fill:false },
-        { label:'Ком. Long',  data:clArr, borderColor:'#f7c04f', borderWidth:1.5, tension:0.35, pointRadius:0, fill:false, borderDash:[5,4] },
-        { label:'Ком. Short', data:csArr, borderColor:'#9f7afa', borderWidth:1.5, tension:0.35, pointRadius:0, fill:false, borderDash:[5,4] },
-      ]
-    },
-    options: {
-      responsive:true, maintainAspectRatio:false,
-      interaction:{ mode:'index', intersect:false },
-      plugins:{ legend:{display:false}, tooltip:TT },
-      scales:{
-        x:{ grid:{ color:GRID }, ticks:TICK },
-        y:{ grid:{ color:GRID }, ticks:{ ...TICK, callback: v => fmtK(v) } }
-      }
-    }
-  });
-
-  // net chart
-  const netColors = netArr.map(v => v >= 0 ? 'rgba(61,214,140,0.65)' : 'rgba(247,95,95,0.65)');
-  charts.net = new Chart(document.getElementById('netChart'), {
-    type: 'bar',
-    data: { labels, datasets: [{ label:'Net Spec.', data:netArr, backgroundColor:netColors, borderWidth:0, borderRadius:2 }] },
-    options: {
-      responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{display:false}, tooltip:{ ...TT, callbacks:{ label: ctx => `Net: ${fmtK(ctx.raw)}` } } },
-      scales:{
-        x:{ grid:{ color:GRID }, ticks:TICK },
-        y:{ grid:{ color:GRID }, ticks:{ ...TICK, callback: v => fmtK(v) } }
-      }
-    }
-  });
-
-  // oi chart
-  charts.oi = new Chart(document.getElementById('oiChart'), {
-    type: 'line',
-    data: { labels, datasets: [{ label:'Open Interest', data:oiArr, borderColor:'#4fc8f7', borderWidth:2, tension:0.35, pointRadius:0, fill:true, backgroundColor:'rgba(79,200,247,0.08)' }] },
-    options: {
-      responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{display:false}, tooltip:{ ...TT, callbacks:{ label: ctx => `OI: ${fmtK(ctx.raw)}` } } },
-      scales:{
-        x:{ grid:{ color:GRID }, ticks:TICK },
-        y:{ grid:{ color:GRID }, ticks:{ ...TICK, callback: v => fmtK(v) } }
-      }
-    }
-  });
-
-  // breakdown bars
-  const allVals = [nl, ns, cl, cs];
-  const maxVal  = Math.max(...allVals) || 1;
-  const total   = allVals.reduce((a,b)=>a+b,0) || 1;
-  const rows = [
-    { label:'Нек. Long',  val:nl, color:'#4f8ef7' },
-    { label:'Нек. Short', val:ns, color:'#f75f5f' },
-    { label:'Ком. Long',  val:cl, color:'#f7c04f' },
-    { label:'Ком. Short', val:cs, color:'#9f7afa' },
-  ];
-  document.getElementById('breakdown').innerHTML = `<div class="breakdown">${
-    rows.map(r => `
-      <div class="br-row">
-        <div class="br-label">${r.label}</div>
-        <div class="br-track">
-          <div class="br-fill" style="width:${(r.val/maxVal*100).toFixed(1)}%;background:${r.color}"></div>
-        </div>
-        <div class="br-val">${fmtK(r.val)} <span style="color:var(--muted)">${(r.val/total*100).toFixed(1)}%</span></div>
-      </div>`
-    ).join('')
-  }</div>`;
+function loadTV(sym){
+  const box=document.getElementById('tv-box');
+  box.innerHTML='';
+  document.getElementById('tv-sym').textContent=sym||'—';
+  if(!sym)return;
+  const w=document.createElement('div');
+  w.className='tradingview-widget-container';
+  w.style.height='100%';
+  const inner=document.createElement('div');
+  inner.className='tradingview-widget-container__widget';
+  inner.style.height='100%';
+  const sc=document.createElement('script');
+  sc.src='https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
+  sc.async=true;
+  sc.textContent=JSON.stringify({autosize:true,symbol:sym,interval:'W',timezone:'Etc/UTC',theme:'dark',style:'1',locale:'en',hide_top_toolbar:false,hide_legend:true,save_image:false,calendar:false,hide_volume:true,backgroundColor:'#111114',gridColor:'rgba(34,34,40,0.8)'});
+  w.appendChild(inner);w.appendChild(sc);box.appendChild(w);
 }
 
-// auto load on start
+function render(){
+  const data=weeks===0?allData:allData.slice(-weeks);
+  if(!data.length)return;
+  renderStats(data);renderCharts(data);renderPct(data);renderTable(data);
+}
+
+function renderStats(data){
+  const last=data.at(-1),prev=data.at(-2);
+  const amN=nett(last,'asset_mgr_positions_long_all','asset_mgr_positions_short_all');
+  const lfN=nett(last,'lev_money_positions_long_all','lev_money_positions_short_all');
+  const dN=nett(last,'dealer_positions_long_all','dealer_positions_short_all');
+  const oN=nett(last,'other_rept_positions_long_all','other_rept_positions_short_all');
+  const oi=parseFloat(last.open_interest_all)||0;
+
+  const sc=document.getElementById('s-am');sc.textContent=fmt(amN);sc.style.color=amN>=0?'var(--am)':'var(--red)';
+  const sl=document.getElementById('s-lf');sl.textContent=fmt(lfN);sl.style.color=lfN>=0?'var(--lf)':'var(--red)';
+  const sd=document.getElementById('s-d');sd.textContent=fmt(dN);sd.style.color=dN>=0?'var(--dealer)':'var(--red)';
+  const so=document.getElementById('s-o');so.textContent=fmt(oN);so.style.color=oN>=0?'var(--other)':'var(--red)';
+  document.getElementById('s-oi').textContent=fmt(oi);
+
+  if(prev){
+    setDelta(document.getElementById('d-am'),amN-nett(prev,'asset_mgr_positions_long_all','asset_mgr_positions_short_all'));
+    setDelta(document.getElementById('d-lf'),lfN-nett(prev,'lev_money_positions_long_all','lev_money_positions_short_all'));
+    setDelta(document.getElementById('d-d'),dN-nett(prev,'dealer_positions_long_all','dealer_positions_short_all'));
+    setDelta(document.getElementById('d-o'),oN-nett(prev,'other_rept_positions_long_all','other_rept_positions_short_all'));
+    setDelta(document.getElementById('d-oi'),oi-(parseFloat(prev.open_interest_all)||0));
+  }
+
+  const amArr=data.map(d=>nett(d,'asset_mgr_positions_long_all','asset_mgr_positions_short_all'));
+  const lfArr=data.map(d=>nett(d,'lev_money_positions_long_all','lev_money_positions_short_all'));
+  const dArr=data.map(d=>nett(d,'dealer_positions_long_all','dealer_positions_short_all'));
+  const oiArr=data.map(d=>parseFloat(d.open_interest_all)||0);
+
+  const bar=(id,arr,val)=>{const mn=Math.min(...arr),mx=Math.max(...arr);document.getElementById(id).style.width=(mx>mn?(val-mn)/(mx-mn)*100:50)+'%';};
+  bar('b-am',amArr,amN);bar('b-lf',lfArr,lfN);bar('b-d',dArr,dN);bar('b-oi',oiArr,oi);
+
+  const pctArr=allData.map(d=>nett(d,'asset_mgr_positions_long_all','asset_mgr_positions_short_all'));
+  const win=pctArr.slice(-156);const curAm=pctArr.at(-1);
+  const pct=win.length>10?Math.round(win.filter(v=>v<=curAm).length/win.length*100):50;
+  const pc=pctC(pct);
+  document.getElementById('s-pct').textContent=pct+'%';
+  document.getElementById('s-pct').style.color=pc;
+  document.getElementById('b-pct').style.width=pct+'%';
+  document.getElementById('b-pct').style.background=pc;
+}
+
+function renderCharts(data){
+  const labels=data.map(d=>d.report_date_as_yyyy_mm_dd?.slice(0,10)||'');
+  const amN=data.map(d=>nett(d,'asset_mgr_positions_long_all','asset_mgr_positions_short_all'));
+  const lfN=data.map(d=>nett(d,'lev_money_positions_long_all','lev_money_positions_short_all'));
+  const dN=data.map(d=>nett(d,'dealer_positions_long_all','dealer_positions_short_all'));
+  const oiA=data.map(d=>parseFloat(d.open_interest_all)||0);
+
+  const baseOpts={responsive:true,maintainAspectRatio:false,animation:{duration:400},plugins:{legend:{display:false},tooltip:{backgroundColor:'#18181d',borderColor:'#2a2a32',borderWidth:1,titleColor:'#888899',bodyColor:'#e8e8f0',titleFont:{family:'IBM Plex Mono',size:10},bodyFont:{family:'IBM Plex Mono',size:11},callbacks:{label:ctx=>' '+ctx.dataset.label+': '+fmt(ctx.raw)}}},scales:{x:{ticks:{color:'#555566',font:{family:'IBM Plex Mono',size:9},maxTicksLimit:8},grid:{color:'#18181d'},border:{color:'#222228'}},y:{ticks:{color:'#555566',font:{family:'IBM Plex Mono',size:9},callback:v=>fmt(v)},grid:{color:'#18181d'},border:{color:'#222228'}}}};
+
+  if(charts.pos)charts.pos.destroy();
+  charts.pos=new Chart(document.getElementById('posChart'),{type:'line',data:{labels,datasets:[
+    {label:'Asset Mgrs',data:amN,borderColor:'#3db8ff',backgroundColor:'rgba(61,184,255,0.07)',borderWidth:2,pointRadius:0,tension:0.3,fill:true},
+    {label:'Lev. Funds',data:lfN,borderColor:'#ff6b35',backgroundColor:'rgba(255,107,53,0.07)',borderWidth:2,pointRadius:0,tension:0.3,fill:true},
+    {label:'Dealers',data:dN,borderColor:'#a855f7',backgroundColor:'transparent',borderWidth:1.5,pointRadius:0,tension:0.3,borderDash:[4,3]},
+  ]},options:baseOpts});
+
+  if(charts.oi)charts.oi.destroy();
+  charts.oi=new Chart(document.getElementById('oiChart'),{type:'bar',data:{labels,datasets:[{label:'Open Interest',data:oiA,backgroundColor:'rgba(136,136,153,0.35)',borderWidth:0,borderRadius:1}]},options:baseOpts});
+}
+
+function renderPct(data){
+  const wrap=document.getElementById('pct-wrap');
+  const calcP=(arr)=>{const val=arr.at(-1);const win=arr.slice(-156);if(win.length<10)return null;return Math.round(win.filter(v=>v<=val).length/win.length*100);};
+  const rows=[
+    {l:'Asset Mgrs',arr:data.map(d=>nett(d,'asset_mgr_positions_long_all','asset_mgr_positions_short_all'))},
+    {l:'Lev. Funds',arr:data.map(d=>nett(d,'lev_money_positions_long_all','lev_money_positions_short_all'))},
+    {l:'Dealers',arr:data.map(d=>nett(d,'dealer_positions_long_all','dealer_positions_short_all'))},
+    {l:'Other Rept.',arr:data.map(d=>nett(d,'other_rept_positions_long_all','other_rept_positions_short_all'))},
+  ];
+  wrap.innerHTML=rows.map(r=>{const p=calcP(r.arr);const c=pctC(p??50);return`<div class="pr"><span class="pl">${r.l}</span><div class="pt2"><div class="pf" style="width:${p??0}%;background:${c}"></div></div><span class="pv" style="color:${c}">${p!==null?p+'%':'—'}</span></div>`;}).join('');
+}
+
+function renderTable(data){
+  const wrap=document.getElementById('tbl');
+  const rows=[...data].reverse().slice(0,20);
+  const dc=v=>v===null?'—':`<span class="${v>=0?'tp':'tn'}">${v>=0?'+':''}${fmt(v)}</span>`;
+  wrap.innerHTML=`<table><thead><tr><th>Дата</th><th>Asset Mgrs</th><th>Δ</th><th>Lev. Funds</th><th>Δ</th><th>Dealers</th><th>Δ</th><th>Other Rept.</th><th>Δ</th><th>Open Int.</th></tr></thead><tbody>${rows.map((d,i)=>{
+    const p=rows[i+1];
+    const am=nett(d,'asset_mgr_positions_long_all','asset_mgr_positions_short_all');
+    const lf=nett(d,'lev_money_positions_long_all','lev_money_positions_short_all');
+    const dd=nett(d,'dealer_positions_long_all','dealer_positions_short_all');
+    const oo=nett(d,'other_rept_positions_long_all','other_rept_positions_short_all');
+    const oi=parseFloat(d.open_interest_all)||0;
+    return`<tr><td>${d.report_date_as_yyyy_mm_dd?.slice(0,10)||'—'}</td><td class="tam">${fmt(am)}</td><td>${dc(p?am-nett(p,'asset_mgr_positions_long_all','asset_mgr_positions_short_all'):null)}</td><td class="tlf">${fmt(lf)}</td><td>${dc(p?lf-nett(p,'lev_money_positions_long_all','lev_money_positions_short_all'):null)}</td><td class="td">${fmt(dd)}</td><td>${dc(p?dd-nett(p,'dealer_positions_long_all','dealer_positions_short_all'):null)}</td><td style="color:var(--other)">${fmt(oo)}</td><td>${dc(p?oo-nett(p,'other_rept_positions_long_all','other_rept_positions_short_all'):null)}</td><td>${fmt(oi)}</td></tr>`;
+  }).join('')}</tbody></table>`;
+}
+
 load();
 </script>
 </body>
